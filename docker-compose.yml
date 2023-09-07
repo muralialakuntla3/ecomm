@@ -5,18 +5,21 @@ services:
     ports:
       - "8080:80"
     volumes: 
-      - app-data/ecomm:/usr/local/apache2/htdocs
-    network:
+      - app-data:/data/ecomm
+    networks:
       - myapp
+
   food:
     image: muralialakuntla3/food-app
     ports:
       - "9090:80"
     volumes: 
-      - app-data/food:/usr/local/apache2/htdocs
-    network:
+      - app-data:/data/food
+    networks:
       - myapp
+
 volumes:
   app-data:
-network:
+
+networks:
   myapp:
