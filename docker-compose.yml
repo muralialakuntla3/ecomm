@@ -16,7 +16,7 @@ services:
       - app-data/food:/usr/local/apache2/htdocs
     network:
       - myapp
-  volumes:
-    app-data:
-  network:
-    myapp:
+volumes:
+  app-data:
+network:
+  myapp:
