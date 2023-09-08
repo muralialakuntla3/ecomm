@@ -2,24 +2,26 @@ version: '3'
 services:
   ecomm:
     image: muralialakuntla3/ecomm
+    container_name: ecomm        
     ports:
       - "8080:80"
-    volumes: 
-      - app-data:/data/ecomm
+    volumes:
+      - ecomm:/usr/local/apache2/htdocs
+
     networks:
       - myapp
-
   food:
-    image: muralialakuntla3/food-app
+    image: muralialakuntla3/food-app   
+    container_name: food
     ports:
       - "9090:80"
-    volumes: 
-      - app-data:/data/food
+    volumes:
+      - food:/usr/local/apache2/htdocs 
+
     networks:
       - myapp
-
-volumes:
-  app-data:
-
 networks:
   myapp:
+volumes:
+  ecomm:
+  food:
