@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecomm-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      component: ecomm
+  template:
+    metadata:
+      labels:
+        component: ecomm
+    spec:
+      containers:
+        - name: ecomm
+          image: muralialakuntla3/ecomm
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+        
