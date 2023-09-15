@@ -18,4 +18,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+      tolerations:                 # Add this section for tolerations
+        - key: "dedicated"
+          operator: "Equal"
+          value: "special"
+          effect: "NoSchedule"
         
