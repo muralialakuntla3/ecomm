@@ -1,2 +1,2 @@
-# ecomm 
+# ecomm application code 
 
