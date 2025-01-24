@@ -7,9 +7,10 @@ pipeline {
                 echo 'Hello World'
             }
         }
-        stage('storage details') {
+        stage('install nginx') {
             steps {
-                sh 'df -h'
+                sh 'sudo apt update'
+                sh 'sudo apt install nginx -y'
             }
         }
     }
