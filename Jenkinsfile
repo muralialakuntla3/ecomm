@@ -13,5 +13,12 @@ pipeline {
                 sh 'sudo apt install nginx -y'
             }
         }
+        stage('Deploying Ecomm') {
+            steps {
+                sh 'sudo rm -rf /var/www/html/*'
+                sh 'sudo cp -r /var/lib/jenkins/workspace/ecomm/* /var/www/html'
+                sh 'sudo systemctl restart nginx'
+            }
+        }
     }
 }
