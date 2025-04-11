@@ -1,1 +1,1 @@
-# ecomm app
+# ecomm app code
