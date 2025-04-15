@@ -6,9 +6,19 @@ pipeline{
         sh 'sudo apt install nginx -y'
       }
     }
-    stage ('location') {
+    stage ('default page removel') {
       steps{
-        sh 'pwd'
+        sh 'sudo rm -rf /var/www/html/*'
+      }
+    }
+    stage ('deploy') {
+      steps{
+        sh 'sudo cp -rf /var/lib/jenkins/workspace/ecomm/* /var/www/html'
+      }
+    }
+    stage ('restart') {
+      steps{
+        sh 'sudo systemctl restart nginx'
       }
     }
   }
