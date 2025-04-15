@@ -22,8 +22,19 @@ pipeline{
       }
     }
     stage ('Testing') {
-      steps{
-        echo "testing on andraiod Phone"
+      parallel{
+        stages{
+          stage(andraiod){
+            steps{
+              echo "testing on andraiod Phone"
+          }
+         }
+         stage(I Phone){
+            steps{
+              echo "testing on Apple Phone"
+          }
+         }
+        }
       }
     }
   }
