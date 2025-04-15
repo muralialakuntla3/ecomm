@@ -1,14 +1,9 @@
 pipeline{
   agent any
   stages {
-    stage ('build') {
+    stage ('web server') {
       steps {
-        echo 'build completed'
-      }
-    }
-    stage ('Test') {
-      steps{
-        echo 'Test completed'
+        sh 'sudo apt install nginx -y'
       }
     }
     stage ('location') {
