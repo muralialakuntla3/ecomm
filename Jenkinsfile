@@ -21,5 +21,10 @@ pipeline{
         sh 'sudo systemctl restart nginx'
       }
     }
+    stage ('Testing') {
+      steps{
+        echo "testing on andraiod Phone"
+      }
+    }
   }
 }
