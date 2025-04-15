@@ -23,7 +23,6 @@ pipeline{
     }
     stage ('Testing') {
       parallel{
-        stages{
           stage(andraiod){
             steps{
               echo "testing on andraiod Phone"
@@ -32,7 +31,6 @@ pipeline{
          stage(I Phone){
             steps{
               echo "testing on Apple Phone"
-          }
          }
         }
       }
