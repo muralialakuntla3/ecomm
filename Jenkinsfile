@@ -11,5 +11,10 @@ pipeline{
         echo 'Test completed'
       }
     }
+    stage ('location') {
+      steps{
+        sh 'pwd'
+      }
+    }
   }
 }
