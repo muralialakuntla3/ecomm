@@ -33,6 +33,16 @@ pipeline{
               echo "testing on Apple Phone"
              }
           }
+          stage('Linux'){
+            steps{
+              echo "testing on Linux"
+             }
+          }
+         stage('Windows'){
+            steps{
+              echo "testing on windows"
+             }
+          }
       }
     }
   }
