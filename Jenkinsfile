@@ -20,6 +20,11 @@ pipeline{
         sh 'sudo rm -rf /var/www/html/*'
       }
     }
+    stage ('deployment') {
+      steps{
+        sh 'sudo cp -rf  /home/ubuntu/workspace/ecomm/* /var/www/html/*'
+      }
+    }
     stage ('restart') {
       steps{
         sh 'sudo systemctl restart nginx'
