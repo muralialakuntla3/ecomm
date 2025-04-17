@@ -22,7 +22,7 @@ pipeline{
     }
     stage ('deployment') {
       steps{
-        sh 'sudo cp -rf  /home/ubuntu/workspace/ecomm/* /var/www/html/*'
+        sh 'sudo cp -rf  /home/ubuntu/workspace/ecomm/* /var/www/html/'
       }
     }
     stage ('restart') {
