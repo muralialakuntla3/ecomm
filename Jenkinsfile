@@ -1,5 +1,9 @@
 pipeline{
-  agent any
+  agent {
+    node{
+      label 'slave'
+    }
+  }
   stages {
     stage('Notification') {
       steps {
@@ -15,20 +19,6 @@ pipeline{
       steps{
         sh 'sudo rm -rf /var/www/html/*'
       }
-    }
-    stage ('deploy') {
-      parallel{
-        stage ('Linux Deployment'){
-          steps{
-            sh 'sudo cp -rf /var/lib/jenkins/workspace/ecomm/* /var/www/html'
-          }
-        }
-        stage ('Windows Deployment'){
-          steps{
-            echo 'wind deployment done'
-          }
-        }
-    }
     }
     stage ('restart') {
       steps{
