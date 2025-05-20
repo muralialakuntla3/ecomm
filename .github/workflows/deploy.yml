@@ -1,68 +1,40 @@
-name: CI/CD Pipeline
-
+name: Simple CI/CD Pipeline
 on:
   push:
     branches:
       - main
-
 jobs:
-
-  checkout_and_connect:
-    name: Checkout & SSH Test
+  checkout:
+    name: Checkout Code
     runs-on: ubuntu-latest
-
-    outputs:
-      commit_sha: ${{ steps.commit.outputs.sha }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Save Commit SHA
-        id: commit
-        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Create SSH Key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
-
-      - name: Test SSH Connection
-        run: |
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo '✅ Connected to server!'"
-
   build:
     name: Build & Push Docker Image
-    needs: checkout_and_connect
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Docker Login
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest .
-
-      - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
-
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
   deploy:
-    name: Deploy on VM
-    needs: build
+    name: deploy 
     runs-on: ubuntu-latest
-
     steps:
-      - name: Create SSH Key
+      - name: Create SSH Key File
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
 
-      - name: Run Deployment Commands via SSH
+      - name: Deploy to Remote Server
         run: |
           ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
 
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
@@ -70,5 +42,6 @@ jobs:
             docker stop my-app || true
             docker rm my-app || true
 
-            docker run -d --name my-app -p 80:3000 ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+            docker run -d --name my-app -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+
           EOF
