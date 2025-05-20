@@ -1,44 +1,35 @@
-name: Simple CI/CD Pipeline
+name: CI/CD with Self-Hosted Runner
 on:
   push:
     branches:
       - main
 jobs:
+  checkout:
+    name: Checkout Code
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
   build:
     name: Build & Push Docker Image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    needs: checkout
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
       - name: Docker Login
-        run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ecomm:latest .
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/ecomm:latest
   deploy:
-    name: deploy 
-    runs-on: ubuntu-latest
+    name: Deploy App Container
+    runs-on: self-hosted
     needs: build
     steps:
-      - name: Create SSH Key File
+      - name: Stop & Remove Existing Container
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
-
-      - name: Deploy to Remote Server
+          docker stop my-app || true
+          docker rm my-app || true
+      - name: Run New Container
         run: |
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
-
-            docker stop my-app || true
-            docker rm my-app || true
-
-            docker run -d --name my-app -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
-
-          EOF
+          docker run -d --name my-app -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/ecomm:latest
