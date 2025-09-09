@@ -1,0 +1,50 @@
+name: Deploy to Vercel with Logs
+
+on:
+  workflow_dispatch: # manually trigger, or replace with push if needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 1. Trigger Vercel Deployment using hook
+      - name: Trigger Vercel Deployment
+        id: deploy
+        run: |
+          DEPLOY_INFO=$(curl -s -X POST "https://api.vercel.com/v1/integrations/deploy/prj_E5FxQNHrnk9niinlv5KshgQBcVax/bYfnJOnNYx")
+          echo "$DEPLOY_INFO" > deploy.json
+          DEPLOY_ID=$(jq -r '.id // .uid' deploy.json)
+          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_ENV
+          echo "Deployment ID: $DEPLOY_ID"
+
+      # 2. Wait for deployment to finish
+      - name: Wait for Deployment
+        run: sleep 20 # adjust if deployments take longer
+
+      # 3. Fetch deployment logs
+      - name: Fetch Vercel Logs
+        run: |
+          curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            "https://api.vercel.com/v2/now/deployments/${{ env.deploy_id }}/events" \
+            > vercel-logs.json
+          head -n 20 vercel-logs.json  # show some logs in console
+
+      # 4. Send logs via Gmail
+      - name: Send Logs via Gmail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.GMAIL_USER }}
+          password: ${{ secrets.GMAIL_PASS }}
+          subject: "Vercel Deployment Logs - ${{ github.run_number }}"
+          to: murali@digitaledify.ai
+          from: GitHub Actions <${{ secrets.GMAIL_USER }}>
+          secure: true
+          body: |
+            Hi,
+            Attached are the Vercel deployment logs for run #${{ github.run_number }}.
+          attachments: vercel-logs.json
