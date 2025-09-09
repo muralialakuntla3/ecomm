@@ -12,11 +12,16 @@ jobs:
 
       # 1. Trigger Vercel Deployment using hook
       - name: Trigger Vercel Deployment
-        id: deploy
         run: |
-          DEPLOY_INFO=$(curl -s -X POST "https://api.vercel.com/v1/integrations/deploy/prj_E5FxQNHrnk9niinlv5KshgQBcVax/bYfnJOnNYx")
-          echo "$DEPLOY_INFO" > deploy.json
-          DEPLOY_ID=$(jq -r '.id // .uid' deploy.json)
+          curl -s -X POST "https://api.vercel.com/v1/integrations/deploy/prj_xxx/xxxTOKENxxx" > trigger.json
+          cat trigger.json
+
+      - name: Get Latest Deployment ID
+        run: |
+          sleep 15
+          DEPLOY_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            "https://api.vercel.com/v13/deployments?projectId=${{ secrets.VERCEL_PROJECT_ID }}&limit=1" \
+            | jq -r '.deployments[0].uid')
           echo "deploy_id=$DEPLOY_ID" >> $GITHUB_ENV
           echo "Deployment ID: $DEPLOY_ID"
 
@@ -30,8 +35,8 @@ jobs:
           curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
             "https://api.vercel.com/v2/now/deployments/${{ env.deploy_id }}/events" \
             > vercel-logs.json
-          head -n 20 vercel-logs.json  # show some logs in console
-
+          head -n 20 vercel-logs.json
+          
       # 4. Send logs via Gmail
       - name: Send Logs via Gmail
         uses: dawidd6/action-send-mail@v3
