@@ -1,8 +1,5 @@
 name: CI/CD with Self-Hosted Runner
-on:
-  push:
-    branches:
-      - main
+on: workflow_dispatch
 jobs:
   checkout:
     name: Checkout Code
